@@ -6,6 +6,14 @@
 #                    Completely separate from $PORT; only used for the DB connection.
 set -e
 
+# workers > 0 switches Odoo from its single-threaded dev server (which processes
+# requests ONE AT A TIME — a single backend page load fires off dozens of separate
+# asset/RPC requests that then queue up behind each other) to multiple worker
+# processes handled in parallel. This is what actually fixes "pages are slow" when
+# CPU/memory graphs show the container barely being used — the old setup wasn't
+# resource-starved, it was serializing everything through one thread. Override with
+# the ODOO_WORKERS variable if this ever needs tuning down for a smaller Railway plan.
+#
 # admin_passwd guards Odoo's DATABASE MANAGER (create/backup/duplicate/drop a
 # database) — it is NOT the login password for your own Odoo user account. Written
 # into a real odoo.conf (no reliable CLI flag for this across Odoo versions).
@@ -19,6 +27,8 @@ db_user = ${PGUSER}
 db_password = ${PGPASSWORD}
 db_name = ${PGDATABASE:-}
 addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+workers = ${ODOO_WORKERS:-2}
+max_cron_threads = 1
 CONFEOF
 
 DEMO_FLAG=""
