@@ -6,6 +6,7 @@
         <field name="model">gps.audit.wizard</field>
         <field name="arch" type="xml">
             <form string="GPS Audit">
+                <field name="ran" invisible="1"/>
                 <group>
                     <field name="worker_id"/>
                     <field name="date"/>
@@ -38,6 +39,7 @@
         <field name="model">gps.planner.wizard</field>
         <field name="arch" type="xml">
             <form string="GPS Planner">
+                <field name="optimized" invisible="1"/>
                 <group>
                     <field name="worker_id"/>
                     <field name="date"/>
