@@ -34,26 +34,31 @@ Community or Enterprise. Full background/decisions: see `Plan-StarX-Odoo.md` in
    (`PGUSER`/`PGPASSWORD` are the role you just created — NOT a reference to the
    plugin's own superuser credentials. Adjust `Postgres` in `${{...}}` if your
    Postgres service has a different name.)
-5. Also set **`MASTER_PASSWORD`** — a password of your choice for Odoo's
-   *database manager* (create/backup/duplicate/drop a database; this is
-   **different** from your own Odoo login, which you set on the next screen).
-   Without it, Odoo falls back to its insecure default (`admin`).
+5. Also set:
+   - **`MASTER_PASSWORD`** — a password of your choice for Odoo's *database
+     manager* (create/backup/duplicate/drop a database — **different** from
+     your own Odoo login). Without it, Odoo falls back to its insecure
+     default (`admin`).
+   - **`ADMIN_PASSWORD`** — the password for your own login (username
+     `admin`). The database is bootstrapped automatically from the command
+     line on boot (see entrypoint.sh), NOT through Odoo's interactive
+     "Create Database" web wizard — so nobody ever types this in by hand,
+     and there's no SMTP configured for "forgot password" to work either.
+     This variable is applied on **every boot**, so if you ever get locked
+     out, change it in Railway and redeploy to get back in.
 6. Railway builds the `Dockerfile` (the official `odoo:17.0` image + this addon
    copied into `/mnt/extra-addons`) and deploys it, listening on Railway's own
-   `$PORT`.
-7. **First boot — do this once:** open the deployed URL. Odoo shows a
-   simplified "Create Database" screen (the database name is already fixed to
-   `PGDATABASE`, so it only asks for the master password, your login, and
-   whether to load demo data):
-   - Enter the `MASTER_PASSWORD` you set above (or `admin` if you skipped it).
-   - Pick a login email/password for yourself.
-   - **Check "Load demonstration data"** — seeds one demo worker (Carlos Ruiz)
-     with 4 points and check-ins in a deliberately bad order, so the Audit
-     screen has a real detour to show immediately.
-   - Odoo logs you in. Go to **Apps**, remove the "Apps" filter, search
-     **"StarX"**, click **Install**.
-8. Menu **GPS Intelligence** appears in the main nav: *Audit a day*,
-   *Plan & dispatch*, *Dispatched routes*, *Check-ins*.
+   `$PORT`. First boot takes longer (installing `base` + all dependencies +
+   `starx_gps` + demo data); watch the logs for `>>> Install/update step
+   complete.` followed by `HTTP service (werkzeug) running on...`.
+7. Open the deployed URL — it goes straight to the **login screen** (no
+   database wizard). Log in as `admin` / your `ADMIN_PASSWORD`.
+8. Go to **Apps**, remove the "Apps" filter, search **"StarX"** — it's
+   already installed (the entrypoint does this on every boot), just confirm
+   it's there. Menu **GPS Intelligence** appears in the main nav: *Audit a
+   day*, *Plan & dispatch*, *Dispatched routes*, *Check-ins*. Demo data
+   (Carlos Ruiz + 4 points + a deliberately bad visit order) is seeded
+   automatically unless you set `LOAD_DEMO=false`.
 
 ### The worker's check-in link
 

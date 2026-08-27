@@ -36,4 +36,19 @@ echo ">>> Ensuring starx_gps is installed..."
 odoo --config="$CONF" --stop-after-init -i starx_gps $DEMO_FLAG
 echo ">>> Install/update step complete."
 
+# The database was bootstrapped from the command line (-i above), never through the
+# web "Create Database" wizard — so nobody ever typed in an admin login/password for
+# it. Set (or reset) it here from $ADMIN_PASSWORD on every boot, idempotently, so
+# access is always recoverable by changing a Railway variable and redeploying — no
+# working email/SMTP required (none is configured in this deployment, so the "forgot
+# password" flow cannot work either).
+# NOTE: keep ADMIN_PASSWORD free of single-quote characters — it's embedded in a
+# single-quoted Python string below.
+if [ -n "$ADMIN_PASSWORD" ]; then
+  echo ">>> Setting the 'admin' user's password from \$ADMIN_PASSWORD..."
+  echo "env['res.users'].search([('login','=','admin')]).write({'password': '$ADMIN_PASSWORD'}); env.cr.commit()" \
+    | odoo shell --config="$CONF" -d "${PGDATABASE:-}" --no-http
+  echo ">>> Admin password set."
+fi
+
 exec odoo --config="$CONF" --http-port="${PORT:-8069}" "$@"
