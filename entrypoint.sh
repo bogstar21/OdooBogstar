@@ -46,19 +46,31 @@ echo ">>> Ensuring starx_gps is installed..."
 odoo --config="$CONF" --stop-after-init -i starx_gps $DEMO_FLAG
 echo ">>> Install/update step complete."
 
-# The database was bootstrapped from the command line (-i above), never through the
-# web "Create Database" wizard — so nobody ever typed in an admin login/password for
-# it. Set (or reset) it here from $ADMIN_PASSWORD on every boot, idempotently, so
-# access is always recoverable by changing a Railway variable and redeploying — no
-# working email/SMTP required (none is configured in this deployment, so the "forgot
-# password" flow cannot work either).
+# Two settings the database was never given a chance to get right, since it was
+# bootstrapped from the command line (-i above), never through the web "Create
+# Database" wizard where a human would normally set both:
+#   - the admin login password ($ADMIN_PASSWORD) — with no SMTP configured either,
+#     "forgot password" can't work, so this is applied on EVERY boot, idempotently,
+#     making access always recoverable: change the Railway variable, redeploy.
+#   - web.base.url ($RAILWAY_PUBLIC_DOMAIN, injected by Railway automatically) — the
+#     employee check-in link (hr_employee.py's checkin_url) is built FROM this
+#     setting, so a wrong or unset value here silently produces a broken link
+#     (e.g. pointing at localhost) rather than an obvious error.
 # NOTE: keep ADMIN_PASSWORD free of single-quote characters — it's embedded in a
 # single-quoted Python string below.
+SHELL_SCRIPT=""
 if [ -n "$ADMIN_PASSWORD" ]; then
-  echo ">>> Setting the 'admin' user's password from \$ADMIN_PASSWORD..."
-  echo "env['res.users'].search([('login','=','admin')]).write({'password': '$ADMIN_PASSWORD'}); env.cr.commit()" \
-    | odoo shell --config="$CONF" -d "${PGDATABASE:-}" --no-http
-  echo ">>> Admin password set."
+  SHELL_SCRIPT="${SHELL_SCRIPT}env['res.users'].search([('login','=','admin')]).write({'password': '$ADMIN_PASSWORD'})
+"
+fi
+if [ -n "$RAILWAY_PUBLIC_DOMAIN" ]; then
+  SHELL_SCRIPT="${SHELL_SCRIPT}env['ir.config_parameter'].sudo().set_param('web.base.url', 'https://$RAILWAY_PUBLIC_DOMAIN')
+"
+fi
+if [ -n "$SHELL_SCRIPT" ]; then
+  echo ">>> Applying runtime settings (admin password / web.base.url)..."
+  printf '%s\nenv.cr.commit()\n' "$SHELL_SCRIPT" | odoo shell --config="$CONF" -d "${PGDATABASE:-}" --no-http
+  echo ">>> Runtime settings applied."
 fi
 
 exec odoo --config="$CONF" --http-port="${PORT:-8069}" "$@"

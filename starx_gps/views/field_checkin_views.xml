@@ -47,7 +47,7 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
                 <group string="StarX GPS — Check-in link" name="starx_gps_checkin">
-                    <field name="checkin_token" readonly="1"/>
+                    <field name="checkin_url" widget="url" readonly="1" string="Share this link with the worker"/>
                     <button name="action_regenerate_checkin_token" type="object"
                             string="Regenerate check-in link" class="btn-link"/>
                 </group>

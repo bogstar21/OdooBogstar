@@ -16,9 +16,18 @@ class HrEmployee(models.Model):
     checkin_token = fields.Char(
         string="Check-in link token", copy=False, readonly=True,
         default=lambda self: secrets.token_urlsafe(24),
-        help="Part of this employee's no-login check-in URL. Use "
-             "'Regenerate check-in link' if it leaks.",
     )
+    checkin_url = fields.Char(string="Check-in link", compute="_compute_checkin_url")
+
+    def _compute_checkin_url(self):
+        # web.base.url is Odoo's own record of its public URL (set automatically to
+        # whatever domain served the current request, e.g. the Railway URL) — this is
+        # what turns the bare, easy-to-miss token into a full link you can actually
+        # click or copy, instead of expecting someone to assemble
+        # "<their domain> + /checkin/ + <token>" by hand.
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url", "")
+        for rec in self:
+            rec.checkin_url = ("%s/checkin/%s" % (base_url, rec.checkin_token)) if rec.checkin_token else False
 
     def action_regenerate_checkin_token(self):
         for rec in self:
