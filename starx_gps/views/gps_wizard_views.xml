@@ -45,10 +45,11 @@
                     <field name="date"/>
                     <field name="start_time"/>
                     <field name="point_ids" widget="many2many_tags"/>
-                    <button name="action_select_all_points" type="object"
-                            string="Seleccionar todas las paradas del trabajador"
-                            class="btn-link" invisible="not worker_id"/>
                 </group>
+                <button name="action_select_all_points" type="object"
+                        string="Seleccionar todas las paradas del trabajador"
+                        class="btn btn-secondary btn-sm" invisible="not worker_id"
+                        style="margin-bottom:12px"/>
                 <footer>
                     <button name="action_optimize" type="object" string="Optimize" class="btn-primary"/>
                     <button name="action_dispatch" type="object" string="Dispatch"

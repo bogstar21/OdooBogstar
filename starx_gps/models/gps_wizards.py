@@ -119,10 +119,20 @@ class GpsPlannerWizard(models.TransientModel):
         # grabs every point already assigned to the chosen worker in one click. Points
         # without coordinates yet are included too (action_optimize/plan_route already
         # skips and reports them as "skipped", so including them here is harmless).
+        #
+        # Explicit .write() + returning a "reopen this form" action, matching
+        # action_optimize/action_dispatch below: on a wizard form, a bare field
+        # assignment with no returned action is not reliably picked up by the client
+        # (the same reason those two methods already return this exact action dict).
         self.ensure_one()
         if self.worker_id:
             points = self.env["res.partner"].search([("field_worker_id", "=", self.worker_id.id)])
-            self.point_ids = [(6, 0, points.ids)]
+            self.write({"point_ids": [(6, 0, points.ids)]})
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": self._name, "res_id": self.id,
+            "view_mode": "form", "target": "new",
+        }
 
     def action_optimize(self):
         self.ensure_one()
