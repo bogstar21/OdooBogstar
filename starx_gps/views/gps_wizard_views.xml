@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── Audit wizard ─────────────────────────────────────────────────────── -->
+    <record id="view_gps_audit_wizard_form" model="ir.ui.view">
+        <field name="name">gps.audit.wizard.form</field>
+        <field name="model">gps.audit.wizard</field>
+        <field name="arch" type="xml">
+            <form string="GPS Audit">
+                <group>
+                    <field name="worker_id"/>
+                    <field name="date"/>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="Run audit" class="btn-primary"/>
+                </footer>
+                <group string="Result" invisible="not ran">
+                    <field name="note" invisible="not note"/>
+                    <field name="actual_km"/>
+                    <field name="optimal_km"/>
+                    <field name="efficiency_pct"/>
+                    <field name="wasted_km"/>
+                </group>
+                <field name="legs_html" invisible="not ran" nolabel="1"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_gps_audit_wizard" model="ir.actions.act_window">
+        <field name="name">Audit a worker's day</field>
+        <field name="res_model">gps.audit.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ── Planner wizard ───────────────────────────────────────────────────── -->
+    <record id="view_gps_planner_wizard_form" model="ir.ui.view">
+        <field name="name">gps.planner.wizard.form</field>
+        <field name="model">gps.planner.wizard</field>
+        <field name="arch" type="xml">
+            <form string="GPS Planner">
+                <group>
+                    <field name="worker_id"/>
+                    <field name="date"/>
+                    <field name="start_time"/>
+                    <field name="point_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_optimize" type="object" string="Optimize" class="btn-primary"/>
+                    <button name="action_dispatch" type="object" string="Dispatch"
+                            class="btn-secondary" invisible="not optimized"/>
+                </footer>
+                <group string="Proposed route" invisible="not optimized">
+                    <field name="total_km"/>
+                    <field name="total_min"/>
+                </group>
+                <field name="preview_html" invisible="not optimized" nolabel="1"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_gps_planner_wizard" model="ir.actions.act_window">
+        <field name="name">Plan &amp; dispatch a route</field>
+        <field name="res_model">gps.planner.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ── Dispatched plans (read-only history) ─────────────────────────────── -->
+    <record id="view_gps_route_plan_list" model="ir.ui.view">
+        <field name="name">gps.route.plan.list</field>
+        <field name="model">gps.route.plan</field>
+        <field name="arch" type="xml">
+            <list string="Dispatched routes">
+                <field name="date"/>
+                <field name="worker_id"/>
+                <field name="total_km"/>
+                <field name="total_min"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_gps_route_plan_form" model="ir.ui.view">
+        <field name="name">gps.route.plan.form</field>
+        <field name="model">gps.route.plan</field>
+        <field name="arch" type="xml">
+            <form string="Route plan">
+                <sheet>
+                    <group>
+                        <field name="worker_id"/>
+                        <field name="date"/>
+                        <field name="total_km"/>
+                        <field name="total_min"/>
+                    </group>
+                    <field name="maps_url" widget="url" string="Google Maps link"/>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="sequence"/>
+                            <field name="point_id"/>
+                            <field name="eta"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_gps_route_plan" model="ir.actions.act_window">
+        <field name="name">Dispatched routes</field>
+        <field name="res_model">gps.route.plan</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

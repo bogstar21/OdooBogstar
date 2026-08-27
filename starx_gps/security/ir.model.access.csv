@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_field_checkin_user,field.checkin.user,model_field_checkin,base.group_user,1,1,1,1
+access_gps_route_plan_user,gps.route.plan.user,model_gps_route_plan,base.group_user,1,1,1,1
+access_gps_route_plan_line_user,gps.route.plan.line.user,model_gps_route_plan_line,base.group_user,1,1,1,1
+access_gps_audit_wizard_user,gps.audit.wizard.user,model_gps_audit_wizard,base.group_user,1,1,1,1
+access_gps_planner_wizard_user,gps.planner.wizard.user,model_gps_planner_wizard,base.group_user,1,1,1,1

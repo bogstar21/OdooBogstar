@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Standalone page (no dependency on the 'website' module's layout) — the
+         worker never needs an Odoo account to reach this. -->
+    <template id="portal_checkin_page" name="StarX Check-in">
+        <!-- No <!DOCTYPE html> here on purpose: a DOCTYPE isn't valid XML content
+             mid-document, and this file IS parsed as strict XML by Odoo's view
+             loader. Modern browsers render this simple a page fine without one
+             (near-standards mode), which is enough for a demo form. -->
+        <html>
+        <head>
+            <meta charset="utf-8"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1"/>
+            <title>Check-in — <t t-esc="employee.name"/></title>
+            <style>
+                body { font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; background: #f3f0e9; color: #1b1a16; }
+                h1 { font-size: 20px; }
+                .card { background: #fff; border: 1px solid #d5cfbf; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+                label { display: block; font-size: 12px; text-transform: uppercase; color: #6b665b; margin: 10px 0 4px; }
+                select, textarea, input[type=file] { width: 100%; padding: 10px; border: 1px solid #d5cfbf; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+                button { width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #e04a2d; color: #fff; font-size: 15px; font-weight: 600; margin-top: 12px; }
+                button:disabled { opacity: .5; }
+                .ok { color: #16a34a; } .bad { color: #dc2626; }
+                .stop { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 13px; }
+            </style>
+        </head>
+        <body>
+            <h1>Hola, <t t-esc="employee.name"/></h1>
+
+            <t t-if="submitted">
+                <p class="ok">✓ Check-in guardado.</p>
+            </t>
+
+            <div class="card">
+                <form id="checkinForm" t-attf-action="/checkin/#{token}/submit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="lat" id="lat"/>
+                    <input type="hidden" name="lng" id="lng"/>
+
+                    <label>Stop</label>
+                    <select name="point_id" required="required">
+                        <option value="">— Choose —</option>
+                        <t t-foreach="points" t-as="p">
+                            <option t-att-value="p.id"><t t-esc="p.name"/></option>
+                        </t>
+                    </select>
+
+                    <label>Photo (optional)</label>
+                    <input type="file" name="photo" accept="image/*" capture="environment"/>
+
+                    <label>Note (optional)</label>
+                    <textarea name="note" rows="2" maxlength="250"></textarea>
+
+                    <p id="geoStatus" style="font-size:12px;color:#6b665b">Getting your location…</p>
+                    <button type="submit" id="submitBtn" disabled="disabled">Submit check-in</button>
+                </form>
+            </div>
+
+            <t t-if="recent">
+                <div class="card">
+                    <label>Recent check-ins</label>
+                    <t t-foreach="recent" t-as="r">
+                        <div class="stop">
+                            <t t-esc="r.point_id.name"/> — <t t-esc="r.checkin_at"/>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+            <script>
+                (function () {
+                    var status = document.getElementById('geoStatus');
+                    var btn = document.getElementById('submitBtn');
+                    if (!navigator.geolocation) {
+                        status.textContent = 'This browser cannot share location.';
+                        status.className = 'bad';
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(function (pos) {
+                        document.getElementById('lat').value = pos.coords.latitude;
+                        document.getElementById('lng').value = pos.coords.longitude;
+                        status.textContent = 'Location captured.';
+                        status.className = 'ok';
+                        btn.disabled = false;
+                    }, function () {
+                        status.textContent = 'Location permission denied — allow it and reload.';
+                        status.className = 'bad';
+                    }, { enableHighAccuracy: true, timeout: 10000 });
+                })();
+            </script>
+        </body>
+        </html>
+    </template>
+</odoo>

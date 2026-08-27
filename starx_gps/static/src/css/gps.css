@@ -1,0 +1,6 @@
+/* GPS Intelligence wizard tables (Audit legs, Planner preview). */
+.o_form_view table.table-sm td,
+.o_form_view table.table-sm th {
+    padding: 4px 8px;
+    font-size: 12.5px;
+}

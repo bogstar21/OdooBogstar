@@ -1,0 +1,6 @@
+# entrypoint.sh runs inside a Linux container — a CRLF shebang line breaks it with a
+# cryptic "no such file or directory" error that looks like a missing binary, not a
+# line-ending problem. Force LF regardless of any local core.autocrlf setting.
+entrypoint.sh text eol=lf
+Dockerfile text eol=lf
+*.py text eol=lf

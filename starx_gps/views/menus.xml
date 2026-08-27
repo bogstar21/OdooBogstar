@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_gps_root" name="GPS Intelligence" sequence="60"/>
+
+    <menuitem id="menu_gps_audit" name="Audit a day" parent="menu_gps_root"
+              action="action_gps_audit_wizard" sequence="10"/>
+    <menuitem id="menu_gps_planner" name="Plan &amp; dispatch" parent="menu_gps_root"
+              action="action_gps_planner_wizard" sequence="20"/>
+    <menuitem id="menu_gps_routes" name="Dispatched routes" parent="menu_gps_root"
+              action="action_gps_route_plan" sequence="30"/>
+    <menuitem id="menu_gps_checkins" name="Check-ins" parent="menu_gps_root"
+              action="action_field_checkin" sequence="40"/>
+</odoo>

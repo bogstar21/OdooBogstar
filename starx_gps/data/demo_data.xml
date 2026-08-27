@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- One demo field worker + four points, three of them visited today in a
+         deliberately bad order — so the Audit wizard has a real detour to find the
+         moment the module is installed, without the demoer typing anything first. -->
+    <record id="demo_employee_1" model="hr.employee">
+        <field name="name">Carlos Ruiz (demo)</field>
+    </record>
+
+    <record id="demo_point_a" model="res.partner">
+        <field name="name">Mercadona Sol (demo)</field>
+        <field name="street">Puerta del Sol 1</field>
+        <field name="city">Madrid</field>
+        <field name="field_worker_id" ref="demo_employee_1"/>
+        <field name="partner_latitude">40.4168</field>
+        <field name="partner_longitude">-3.7038</field>
+    </record>
+    <record id="demo_point_b" model="res.partner">
+        <field name="name">Carrefour Chamartín (demo)</field>
+        <field name="street">Av. Pio XII 20</field>
+        <field name="city">Madrid</field>
+        <field name="field_worker_id" ref="demo_employee_1"/>
+        <field name="partner_latitude">40.4750</field>
+        <field name="partner_longitude">-3.6800</field>
+    </record>
+    <record id="demo_point_c" model="res.partner">
+        <field name="name">Alcampo Vallecas (demo)</field>
+        <field name="street">Av. Albufera 50</field>
+        <field name="city">Madrid</field>
+        <field name="field_worker_id" ref="demo_employee_1"/>
+        <field name="partner_latitude">40.3800</field>
+        <field name="partner_longitude">-3.6500</field>
+    </record>
+    <record id="demo_point_d" model="res.partner">
+        <field name="name">Lidl Moncloa (demo — not visited yet)</field>
+        <field name="street">Princesa 70</field>
+        <field name="city">Madrid</field>
+        <field name="field_worker_id" ref="demo_employee_1"/>
+    </record>
+
+    <!-- Visited A → C → B (a real detour: C is south, B is far north — the optimal
+         order visits them the other way round). Times are relative to "today" so the
+         demo works regardless of when the module gets installed. -->
+    <record id="demo_checkin_1" model="field.checkin">
+        <field name="worker_id" ref="demo_employee_1"/>
+        <field name="point_id" ref="demo_point_a"/>
+        <field name="latitude">40.4168</field>
+        <field name="longitude">-3.7038</field>
+        <field name="checkin_at" eval="datetime.today().strftime('%Y-%m-%d 09:00:00')"/>
+    </record>
+    <record id="demo_checkin_2" model="field.checkin">
+        <field name="worker_id" ref="demo_employee_1"/>
+        <field name="point_id" ref="demo_point_c"/>
+        <field name="latitude">40.3800</field>
+        <field name="longitude">-3.6500</field>
+        <field name="checkin_at" eval="datetime.today().strftime('%Y-%m-%d 11:00:00')"/>
+    </record>
+    <record id="demo_checkin_3" model="field.checkin">
+        <field name="worker_id" ref="demo_employee_1"/>
+        <field name="point_id" ref="demo_point_b"/>
+        <field name="latitude">40.4750</field>
+        <field name="longitude">-3.6800</field>
+        <field name="checkin_at" eval="datetime.today().strftime('%Y-%m-%d 14:00:00')"/>
+    </record>
+</odoo>
