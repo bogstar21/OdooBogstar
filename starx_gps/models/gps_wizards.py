@@ -114,6 +114,16 @@ class GpsPlannerWizard(models.TransientModel):
     # recomputing, so what gets dispatched is exactly what was previewed.
     plan_json = fields.Text()
 
+    def action_select_all_points(self):
+        # Ticking 10+ points one by one in a many2many_tags widget is tedious — this
+        # grabs every point already assigned to the chosen worker in one click. Points
+        # without coordinates yet are included too (action_optimize/plan_route already
+        # skips and reports them as "skipped", so including them here is harmless).
+        self.ensure_one()
+        if self.worker_id:
+            points = self.env["res.partner"].search([("field_worker_id", "=", self.worker_id.id)])
+            self.point_ids = [(6, 0, points.ids)]
+
     def action_optimize(self):
         self.ensure_one()
         if len(self.point_ids) < 2:
