@@ -21,27 +21,19 @@ db_name = ${PGDATABASE:-}
 addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
 CONFEOF
 
-export PGPASSWORD  # so psql below picks it up without prompting
-
 DEMO_FLAG=""
 [ "${LOAD_DEMO:-true}" = "false" ] && DEMO_FLAG="--without-demo=all"
 
-# First boot: Railway's Postgres plugin creates the DATABASE, but it has no Odoo
-# SCHEMA in it yet. Relying on the web "Create Database" wizard to bootstrap this is
-# fragile — a wrong master password (or db_name being pinned in config, as it is
-# above) can leave it half-done, and every request after that crash-loops with
-# "KeyError: 'ir.http'" because the registry can't load against an empty database.
-# So: initialize it here, once, automatically, before ever starting the web server.
-if command -v psql >/dev/null 2>&1; then
-  HAS_SCHEMA=$(psql -h "$PGHOST" -p "${PGPORT:-5432}" -U "$PGUSER" -d "$PGDATABASE" -tAc \
-    "SELECT to_regclass('public.ir_module_module') IS NOT NULL;" 2>/dev/null || echo "f")
-  if [ "$HAS_SCHEMA" != "t" ]; then
-    echo ">>> No Odoo schema in '$PGDATABASE' yet — initializing base + starx_gps..."
-    odoo --config="$CONF" --stop-after-init -i base,starx_gps $DEMO_FLAG
-    echo ">>> Initialization complete."
-  fi
-else
-  echo ">>> psql not found in image — skipping auto-init check, assuming DB is already set up."
-fi
+# Always (re)install starx_gps before starting the web server, instead of trying to
+# detect "is the DB fresh" first. Odoo's `-i` on an already-installed module is a
+# safe, idempotent no-extra-op (it behaves like `-u`) — so this correctly covers
+# EVERY case with one code path: a totally empty database (bootstraps base +
+# dependencies + starx_gps), and the partial-failure case where base/contacts/hr
+# already installed successfully on a previous boot but starx_gps itself didn't
+# (a schema-existence check alone would silently skip it forever in that case,
+# which is exactly what happened once already — see git history).
+echo ">>> Ensuring starx_gps is installed..."
+odoo --config="$CONF" --stop-after-init -i starx_gps $DEMO_FLAG
+echo ">>> Install/update step complete."
 
 exec odoo --config="$CONF" --http-port="${PORT:-8069}" "$@"
