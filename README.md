@@ -10,21 +10,49 @@ Community or Enterprise. Full background/decisions: see `Plan-StarX-Odoo.md` in
 
 1. **New Railway project** → *Deploy from GitHub repo* → pick this repo.
 2. **Add a Postgres plugin** to the same Railway project (one click, from the
-   project dashboard). Railway auto-injects `PGHOST`/`PGPORT`/`PGUSER`/
-   `PGPASSWORD`/`PGDATABASE` — `entrypoint.sh` reads these, nothing to configure
-   by hand.
-3. Railway builds the `Dockerfile` (the official `odoo:17.0` image + this addon
+   project dashboard).
+3. **Create a dedicated, non-superuser role for Odoo.** Odoo refuses to start
+   against Railway's default `postgres` superuser role on purpose (it would give
+   Odoo unrestricted access to the whole Postgres instance, not just its own
+   database) — you'll see `Using the database user 'postgres' is a security
+   risk, aborting.` crash-looping in the logs if you skip this. In the Postgres
+   service's query tool, run (replace `railway` with your actual `PGDATABASE`
+   value, and pick a real password):
+   ```sql
+   CREATE USER odoo_app WITH PASSWORD 'pick-a-strong-password-here' CREATEDB;
+   ALTER DATABASE railway OWNER TO odoo_app;
+   GRANT ALL PRIVILEGES ON DATABASE railway TO odoo_app;
+   ```
+4. In the `starx-gps` service's **Variables** tab, set:
+   ```
+   PGHOST=${{Postgres.PGHOST}}
+   PGPORT=${{Postgres.PGPORT}}
+   PGDATABASE=${{Postgres.PGDATABASE}}
+   PGUSER=odoo_app
+   PGPASSWORD=pick-a-strong-password-here
+   ```
+   (`PGUSER`/`PGPASSWORD` are the role you just created — NOT a reference to the
+   plugin's own superuser credentials. Adjust `Postgres` in `${{...}}` if your
+   Postgres service has a different name.)
+5. Also set **`MASTER_PASSWORD`** — a password of your choice for Odoo's
+   *database manager* (create/backup/duplicate/drop a database; this is
+   **different** from your own Odoo login, which you set on the next screen).
+   Without it, Odoo falls back to its insecure default (`admin`).
+6. Railway builds the `Dockerfile` (the official `odoo:17.0` image + this addon
    copied into `/mnt/extra-addons`) and deploys it, listening on Railway's own
    `$PORT`.
-4. **First boot — do this once:** open the deployed URL. Odoo shows its own
-   "Create Database" screen:
-   - Pick a database name, a login email/password for yourself.
+7. **First boot — do this once:** open the deployed URL. Odoo shows a
+   simplified "Create Database" screen (the database name is already fixed to
+   `PGDATABASE`, so it only asks for the master password, your login, and
+   whether to load demo data):
+   - Enter the `MASTER_PASSWORD` you set above (or `admin` if you skipped it).
+   - Pick a login email/password for yourself.
    - **Check "Load demonstration data"** — seeds one demo worker (Carlos Ruiz)
      with 4 points and check-ins in a deliberately bad order, so the Audit
      screen has a real detour to show immediately.
    - Odoo logs you in. Go to **Apps**, remove the "Apps" filter, search
      **"StarX"**, click **Install**.
-5. Menu **GPS Intelligence** appears in the main nav: *Audit a day*,
+8. Menu **GPS Intelligence** appears in the main nav: *Audit a day*,
    *Plan & dispatch*, *Dispatched routes*, *Check-ins*.
 
 ### The worker's check-in link
