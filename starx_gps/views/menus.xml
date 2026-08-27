@@ -2,12 +2,18 @@
 <odoo>
     <menuitem id="menu_gps_root" name="GPS Intelligence" sequence="60"/>
 
-    <menuitem id="menu_gps_audit" name="Audit a day" parent="menu_gps_root"
-              action="action_gps_audit_wizard" sequence="10"/>
-    <menuitem id="menu_gps_planner" name="Plan &amp; dispatch" parent="menu_gps_root"
-              action="action_gps_planner_wizard" sequence="20"/>
-    <menuitem id="menu_gps_routes" name="Dispatched routes" parent="menu_gps_root"
-              action="action_gps_route_plan" sequence="30"/>
+    <!-- Check-ins is FIRST on purpose: a wizard (target="new", a modal dialog) cannot
+         anchor an app's landing page — there's no full page underneath for the
+         secondary menu bar to attach to, so it silently opens on top of whatever
+         page you happened to be on before (e.g. Discuss). The first item under an
+         app root must be a normal full-page view; wizards work fine as secondary
+         items opened FROM an already-loaded app page. -->
     <menuitem id="menu_gps_checkins" name="Check-ins" parent="menu_gps_root"
-              action="action_field_checkin" sequence="40"/>
+              action="action_field_checkin" sequence="10"/>
+    <menuitem id="menu_gps_routes" name="Dispatched routes" parent="menu_gps_root"
+              action="action_gps_route_plan" sequence="20"/>
+    <menuitem id="menu_gps_audit" name="Audit a day" parent="menu_gps_root"
+              action="action_gps_audit_wizard" sequence="30"/>
+    <menuitem id="menu_gps_planner" name="Plan &amp; dispatch" parent="menu_gps_root"
+              action="action_gps_planner_wizard" sequence="40"/>
 </odoo>
