@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
+from datetime import date
 
 from odoo import http
 from odoo.http import request
@@ -23,9 +24,16 @@ class PortalCheckinController(http.Controller):
         recent = request.env["field.checkin"].sudo().search(
             [("worker_id", "=", employee.id)], order="checkin_at desc", limit=5
         )
+        # The whole point of the Planner/Dispatch flow: the worker sees TODAY's route
+        # on their own no-login page, with the same Google Maps link the admin sees
+        # in the backend — without this, dispatching a route only ever reached the
+        # admin's screen, never the person who actually has to drive it.
+        today_plan = request.env["gps.route.plan"].sudo().search([
+            ("worker_id", "=", employee.id), ("date", "=", date.today()),
+        ], limit=1)
         return request.render("starx_gps.portal_checkin_page", {
             "employee": employee, "points": points, "recent": recent, "token": token,
-            "submitted": kw.get("ok") == "1",
+            "plan": today_plan, "submitted": kw.get("ok") == "1",
         })
 
     @http.route("/checkin/<string:token>/submit", type="http", auth="public", website=False,

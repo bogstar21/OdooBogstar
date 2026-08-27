@@ -22,6 +22,9 @@
                 button:disabled { opacity: .5; }
                 .ok { color: #16a34a; } .bad { color: #dc2626; }
                 .stop { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 13px; }
+                .empty { color: #6b665b; font-size: 13.5px; }
+                .maps-btn { display: block; text-align: center; background: #1a73e8; color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 6px; }
+                .seq { display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background: #f3f0e9; font-size: 11px; font-weight: 700; margin-right: 6px; }
             </style>
         </head>
         <body>
@@ -31,46 +34,79 @@
                 <p class="ok">✓ Check-in guardado.</p>
             </t>
 
+            <!-- Today's dispatched route, if a manager sent one — this is the whole
+                 point of the Planner/Dispatch flow: the worker gets it here, on the
+                 same no-login page, not just visible to the admin in the backend. -->
+            <t t-if="plan">
+                <div class="card">
+                    <label>Tu ruta de hoy</label>
+                    <p style="margin:4px 0 10px;font-size:13px">
+                        <t t-esc="len(plan.line_ids)"/> paradas ·
+                        <t t-esc="'%.1f' % plan.total_km"/> km ·
+                        <t t-esc="round(plan.total_min)"/> min
+                    </p>
+                    <a t-if="plan.maps_url" t-att-href="plan.maps_url" target="_blank" class="maps-btn">
+                        Navegar con Google Maps
+                    </a>
+                    <t t-foreach="plan.line_ids.sorted('sequence')" t-as="l">
+                        <div class="stop">
+                            <span class="seq"><t t-esc="l.sequence"/></span>
+                            <t t-esc="l.point_id.name"/>
+                            <span style="color:#6b665b"> — <t t-esc="l.eta"/></span>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
             <div class="card">
                 <form id="checkinForm" t-attf-action="/checkin/#{token}/submit" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <input type="hidden" name="lat" id="lat"/>
                     <input type="hidden" name="lng" id="lng"/>
 
-                    <label>Stop</label>
-                    <select name="point_id" required="required">
-                        <option value="">— Choose —</option>
-                        <t t-foreach="points" t-as="p">
-                            <option t-att-value="p.id"><t t-esc="p.name"/></option>
-                        </t>
-                    </select>
+                    <t t-if="not points">
+                        <p class="empty">Todavía no tienes paradas asignadas — habla con tu manager.</p>
+                    </t>
+                    <t t-if="points">
+                        <label>Stop</label>
+                        <select name="point_id" required="required">
+                            <option value="">— Choose —</option>
+                            <t t-foreach="points" t-as="p">
+                                <option t-att-value="p.id"><t t-esc="p.name"/></option>
+                            </t>
+                        </select>
 
-                    <label>Photo (optional)</label>
-                    <input type="file" name="photo" accept="image/*" capture="environment"/>
+                        <label>Photo (optional)</label>
+                        <input type="file" name="photo" accept="image/*" capture="environment"/>
 
-                    <label>Note (optional)</label>
-                    <textarea name="note" rows="2" maxlength="250"></textarea>
+                        <label>Note (optional)</label>
+                        <textarea name="note" rows="2" maxlength="250"></textarea>
 
-                    <p id="geoStatus" style="font-size:12px;color:#6b665b">Getting your location…</p>
-                    <button type="submit" id="submitBtn" disabled="disabled">Submit check-in</button>
+                        <p id="geoStatus" style="font-size:12px;color:#6b665b">Getting your location…</p>
+                        <button type="submit" id="submitBtn" disabled="disabled">Submit check-in</button>
+                    </t>
                 </form>
             </div>
 
-            <t t-if="recent">
-                <div class="card">
-                    <label>Recent check-ins</label>
-                    <t t-foreach="recent" t-as="r">
-                        <div class="stop">
-                            <t t-esc="r.point_id.name"/> — <t t-esc="r.checkin_at"/>
-                        </div>
-                    </t>
-                </div>
-            </t>
+            <div class="card">
+                <label>Recent check-ins</label>
+                <t t-if="not recent">
+                    <p class="empty">Aún no tienes check-ins.</p>
+                </t>
+                <t t-foreach="recent" t-as="r">
+                    <div class="stop">
+                        <t t-esc="r.point_id.name"/> — <t t-esc="r.checkin_at"/>
+                    </div>
+                </t>
+            </div>
 
             <script>
                 (function () {
                     var status = document.getElementById('geoStatus');
                     var btn = document.getElementById('submitBtn');
+                    // Neither exists when there are no assigned points — the form's
+                    // fields are skipped entirely in that case (see the template).
+                    if (!status || !btn) return;
                     if (!navigator.geolocation) {
                         status.textContent = 'This browser cannot share location.';
                         status.className = 'bad';

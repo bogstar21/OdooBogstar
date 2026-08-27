@@ -62,6 +62,17 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='category_id']" position="after">
                 <field name="field_worker_id"/>
+                <!-- Normally these are dev-mode-only fields. Surfacing them here lets
+                     an admin set a starting location for a point BEFORE anyone has
+                     ever checked in there — otherwise the Planner can't route to a
+                     brand-new point at all (see Plan-StarX-Odoo.md, MVP gap B). A
+                     real check-in still won't overwrite them once set (see
+                     field_checkin.py's create()). -->
+                <label for="partner_latitude" string="GPS (for GPS Intelligence)"/>
+                <div class="o_row">
+                    <field name="partner_latitude" placeholder="Latitude"/>
+                    <field name="partner_longitude" placeholder="Longitude"/>
+                </div>
             </xpath>
         </field>
     </record>
