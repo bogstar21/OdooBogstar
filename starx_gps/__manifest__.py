@@ -29,6 +29,7 @@ translation, not a redesign.
         "views/field_checkin_views.xml",
         "views/gps_wizard_views.xml",
         "views/portal_templates.xml",
+        "views/report_checkin.xml",
         "views/menus.xml",
     ],
     # Demo data only loads if the database was created with "Load demonstration

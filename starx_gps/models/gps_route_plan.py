@@ -3,9 +3,14 @@ from urllib.parse import quote
 
 from odoo import api, fields, models
 
-# Google Maps' URL API takes an origin + destination + up to 9 intermediate
-# waypoints; beyond that it silently drops the rest. Cap it and say so, rather than
-# handing the worker a truncated route — same rule StarX's gmapsUrl() enforced.
+# Google Maps' URL API takes a destination + up to 9 intermediate waypoints; beyond
+# that it silently drops the rest. Cap it and say so, rather than handing the worker
+# a truncated route — same rule StarX's gmapsUrl() enforced.
+#
+# `origin` is deliberately OMITTED: with no origin param, Maps uses the device's own
+# live GPS position as the starting point when the link is opened — which is what a
+# worker actually wants (navigate from wherever they are RIGHT NOW), not from
+# whatever the planned first stop happened to be, which could already be miles away.
 GMAPS_MAX_WAYPOINTS = 9
 
 
@@ -47,15 +52,17 @@ class GpsRoutePlan(models.Model):
                 for l in lines
                 if l.point_id.partner_latitude or l.point_id.partner_longitude
             ]
-            if len(pts) < 2:
+            if not pts:
                 rec.maps_url = False
                 continue
-            capped = pts[: GMAPS_MAX_WAYPOINTS + 2]
-            origin, destination = capped[0], capped[-1]
-            mid = capped[1:-1]
+            # Destination + up to 9 waypoints = 10 stops total, since there's no
+            # origin slot to "spend" any more (see the note above).
+            capped = pts[: GMAPS_MAX_WAYPOINTS + 1]
+            destination = capped[-1]
+            mid = capped[:-1]
             url = (
                 "https://www.google.com/maps/dir/?api=1&travelmode=driving"
-                "&origin=" + quote(origin) + "&destination=" + quote(destination)
+                "&destination=" + quote(destination)
             )
             if mid:
                 url += "&waypoints=" + quote("|".join(mid))

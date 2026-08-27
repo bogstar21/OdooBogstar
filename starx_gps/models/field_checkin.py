@@ -24,6 +24,7 @@ class FieldCheckin(models.Model):
     latitude = fields.Float(string="Latitude", digits=(10, 7), required=True)
     longitude = fields.Float(string="Longitude", digits=(10, 7), required=True)
     photo = fields.Binary(string="Photo", attachment=True)
+    signature = fields.Binary(string="Signature", attachment=True)
     note = fields.Char(string="Note")
     display_name = fields.Char(compute="_compute_display_name", store=True)
 

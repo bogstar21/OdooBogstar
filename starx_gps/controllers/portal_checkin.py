@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
-from datetime import date
+from datetime import date, datetime, time as dtime
 
 from odoo import http
 from odoo.http import request
@@ -31,9 +31,19 @@ class PortalCheckinController(http.Controller):
         today_plan = request.env["gps.route.plan"].sudo().search([
             ("worker_id", "=", employee.id), ("date", "=", date.today()),
         ], limit=1)
+        # Which of today's route stops are already done — so the page can show them
+        # crossed out instead of the worker having to remember/guess.
+        today_checkins = request.env["field.checkin"].sudo().search([
+            ("worker_id", "=", employee.id),
+            ("checkin_at", ">=", datetime.combine(date.today(), dtime.min)),
+            ("checkin_at", "<=", datetime.combine(date.today(), dtime.max)),
+        ])
+        done_point_ids = set(today_checkins.mapped("point_id").ids)
+
         return request.render("starx_gps.portal_checkin_page", {
             "employee": employee, "points": points, "recent": recent, "token": token,
-            "plan": today_plan, "submitted": kw.get("ok") == "1",
+            "plan": today_plan, "done_point_ids": done_point_ids,
+            "submitted": kw.get("ok") == "1",
         })
 
     @http.route("/checkin/<string:token>/submit", type="http", auth="public", website=False,
@@ -63,6 +73,16 @@ class PortalCheckinController(http.Controller):
         photo = request.httprequest.files.get("photo")
         if photo and photo.filename:
             vals["photo"] = base64.b64encode(photo.read())
+
+        # The signature pad sends a data-URI ("data:image/png;base64,....") in a
+        # hidden field — Odoo's Binary field wants just the base64 payload, so the
+        # "data:image/png;base64," prefix has to come off first. A blank/untouched
+        # pad sends nothing (or just the prefix with no drawing), so this is optional.
+        sig = (post.get("signature") or "").strip()
+        if sig.startswith("data:image"):
+            _, _, sig_b64 = sig.partition(",")
+            if sig_b64:
+                vals["signature"] = sig_b64
 
         request.env["field.checkin"].sudo().create(vals)
         return request.redirect("/checkin/%s?ok=1" % token)

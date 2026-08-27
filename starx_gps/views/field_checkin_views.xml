@@ -27,16 +27,39 @@
                         <field name="longitude"/>
                         <field name="note"/>
                         <field name="photo" widget="image"/>
+                        <field name="signature" widget="image"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
+    <record id="view_field_checkin_pivot" model="ir.ui.view">
+        <field name="name">field.checkin.pivot</field>
+        <field name="model">field.checkin</field>
+        <field name="arch" type="xml">
+            <pivot string="Check-ins">
+                <field name="worker_id" type="row"/>
+                <field name="checkin_at" interval="day" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_field_checkin_graph" model="ir.ui.view">
+        <field name="name">field.checkin.graph</field>
+        <field name="model">field.checkin</field>
+        <field name="arch" type="xml">
+            <graph string="Check-ins" type="bar">
+                <field name="worker_id"/>
+                <field name="checkin_at" interval="day"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_field_checkin" model="ir.actions.act_window">
         <field name="name">Check-ins</field>
         <field name="res_model">field.checkin</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,pivot,graph,form</field>
     </record>
 
     <!-- Employees: link to their no-login check-in page + the regenerate-token action -->

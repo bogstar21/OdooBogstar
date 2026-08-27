@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Native Odoo QWeb PDF report — no external PDF library needed (unlike the
+         original StarX version, which used pdfkit in Node). web.external_layout
+         pulls in the company's own logo/name/address automatically. -->
+    <record id="action_report_checkin" model="ir.actions.report">
+        <field name="name">Albarán de visita</field>
+        <field name="model">field.checkin</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">starx_gps.report_checkin_document</field>
+        <field name="report_file">starx_gps.report_checkin_document</field>
+        <field name="binding_model_id" ref="model_field_checkin"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Albarán - %s' % (object.display_name)</field>
+    </record>
+
+    <template id="report_checkin_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Albarán de visita</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>Trabajador</strong>
+                                <p t-field="o.worker_id.name"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Fecha y hora</strong>
+                                <p t-field="o.checkin_at"/>
+                            </div>
+                        </div>
+                        <div class="row mb32">
+                            <div class="col-12">
+                                <strong>Punto visitado</strong>
+                                <p t-field="o.point_id.name"/>
+                                <p t-field="o.point_id.contact_address"/>
+                            </div>
+                        </div>
+                        <div class="row mb32" t-if="o.note">
+                            <div class="col-12">
+                                <strong>Comentario</strong>
+                                <p t-field="o.note"/>
+                            </div>
+                        </div>
+                        <div class="row mb32">
+                            <div class="col-12">
+                                <strong>Coordenadas GPS</strong>
+                                <p><span t-field="o.latitude"/>, <span t-field="o.longitude"/></p>
+                            </div>
+                        </div>
+                        <div class="row" t-if="o.photo">
+                            <div class="col-6">
+                                <strong>Foto</strong><br/>
+                                <img t-att-src="image_data_uri(o.photo)" style="max-width:220px;max-height:220px;border:1px solid #ddd;margin-top:6px"/>
+                            </div>
+                            <div class="col-6" t-if="o.signature">
+                                <strong>Firma del cliente</strong><br/>
+                                <img t-att-src="image_data_uri(o.signature)" style="max-width:220px;max-height:140px;border:1px solid #ddd;margin-top:6px"/>
+                            </div>
+                        </div>
+                        <div class="row" t-if="not o.photo and o.signature">
+                            <div class="col-6">
+                                <strong>Firma del cliente</strong><br/>
+                                <img t-att-src="image_data_uri(o.signature)" style="max-width:220px;max-height:140px;border:1px solid #ddd;margin-top:6px"/>
+                            </div>
+                        </div>
+                        <p class="text-muted mt32" style="font-size:10px">
+                            Documento generado automáticamente por StarX GPS Intelligence.
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

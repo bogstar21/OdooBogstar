@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Standalone page (no dependency on the 'website' module's layout) — the
-         worker never needs an Odoo account to reach this. -->
+         worker never needs an Odoo account to reach this. Styled to match Odoo 17's
+         own look (the #714B67 brand purple, its card/spacing conventions) so this
+         doesn't feel like a bolted-on external tool. -->
     <template id="portal_checkin_page" name="StarX Check-in">
         <!-- No <!DOCTYPE html> here on purpose: a DOCTYPE isn't valid XML content
              mid-document, and this file IS parsed as strict XML by Odoo's view
@@ -13,22 +15,32 @@
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
             <title>Check-in — <t t-esc="employee.name"/></title>
             <style>
-                body { font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px; background: #f3f0e9; color: #1b1a16; }
-                h1 { font-size: 20px; }
-                .card { background: #fff; border: 1px solid #d5cfbf; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
-                label { display: block; font-size: 12px; text-transform: uppercase; color: #6b665b; margin: 10px 0 4px; }
-                select, textarea, input[type=file] { width: 100%; padding: 10px; border: 1px solid #d5cfbf; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
-                button { width: 100%; padding: 12px; border: 0; border-radius: 8px; background: #e04a2d; color: #fff; font-size: 15px; font-weight: 600; margin-top: 12px; }
-                button:disabled { opacity: .5; }
-                .ok { color: #16a34a; } .bad { color: #dc2626; }
-                .stop { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 13px; }
-                .empty { color: #6b665b; font-size: 13.5px; }
-                .maps-btn { display: block; text-align: center; background: #1a73e8; color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 6px; }
-                .seq { display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background: #f3f0e9; font-size: 11px; font-weight: 700; margin-right: 6px; }
+                :root { --o-primary: #714B67; --o-primary-dark: #5b3c53; --o-bg: #f8f9fa; --o-border: #dee2e6; --o-text: #212529; --o-muted: #6c757d; }
+                body { font-family: 'Roboto', -apple-system, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 0 0 24px; background: var(--o-bg); color: var(--o-text); }
+                .topbar { background: var(--o-primary); color: #fff; padding: 16px 20px; margin-bottom: 18px; }
+                .topbar h1 { margin: 0; font-size: 17px; font-weight: 500; }
+                .content { padding: 0 16px; }
+                .card { background: #fff; border: 1px solid var(--o-border); border-radius: 4px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+                label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; color: var(--o-muted); font-weight: 600; margin: 10px 0 4px; }
+                select, textarea, input[type=file] { width: 100%; padding: 9px 10px; border: 1px solid var(--o-border); border-radius: 4px; font-size: 15px; box-sizing: border-box; font-family: inherit; }
+                button { width: 100%; padding: 11px; border: 0; border-radius: 4px; background: var(--o-primary); color: #fff; font-size: 15px; font-weight: 500; margin-top: 12px; cursor: pointer; }
+                button:hover { background: var(--o-primary-dark); }
+                button:disabled { opacity: .5; cursor: default; }
+                button.secondary { background: #fff; color: var(--o-primary); border: 1px solid var(--o-primary); }
+                .ok { color: #28a745; } .bad { color: #dc3545; }
+                .stop { border-bottom: 1px solid #eee; padding: 8px 0; font-size: 13.5px; }
+                .stop:last-child { border-bottom: 0; }
+                .stop.done { color: var(--o-muted); text-decoration: line-through; }
+                .stop.done .seq { background: #28a745; color: #fff; }
+                .empty { color: var(--o-muted); font-size: 13.5px; }
+                .maps-btn { display: block; text-align: center; background: #1a73e8; color: #fff; padding: 11px; border-radius: 4px; text-decoration: none; font-weight: 500; margin-top: 6px; }
+                .seq { display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background: var(--o-bg); color: var(--o-text); font-size: 11px; font-weight: 700; margin-right: 6px; }
+                #sigPad { border: 1px solid var(--o-border); border-radius: 4px; width: 100%; height: 140px; touch-action: none; background: #fff; }
             </style>
         </head>
         <body>
-            <h1>Hola, <t t-esc="employee.name"/></h1>
+            <div class="topbar"><h1>Hola, <t t-esc="employee.name"/></h1></div>
+            <div class="content">
 
             <t t-if="submitted">
                 <p class="ok">✓ Check-in guardado.</p>
@@ -36,7 +48,8 @@
 
             <!-- Today's dispatched route, if a manager sent one — this is the whole
                  point of the Planner/Dispatch flow: the worker gets it here, on the
-                 same no-login page, not just visible to the admin in the backend. -->
+                 same no-login page, not just visible to the admin in the backend.
+                 Stops already checked in today show crossed out. -->
             <t t-if="plan">
                 <div class="card">
                     <label>Tu ruta de hoy</label>
@@ -49,10 +62,13 @@
                         Navegar con Google Maps
                     </a>
                     <t t-foreach="plan.line_ids.sorted('sequence')" t-as="l">
-                        <div class="stop">
-                            <span class="seq"><t t-esc="l.sequence"/></span>
+                        <div t-attf-class="stop #{l.point_id.id in done_point_ids and 'done' or ''}">
+                            <span class="seq">
+                                <t t-if="l.point_id.id in done_point_ids">✓</t>
+                                <t t-if="l.point_id.id not in done_point_ids"><t t-esc="l.sequence"/></t>
+                            </span>
                             <t t-esc="l.point_id.name"/>
-                            <span style="color:#6b665b"> — <t t-esc="l.eta"/></span>
+                            <span style="color:#6c757d"> — <t t-esc="l.eta"/></span>
                         </div>
                     </t>
                 </div>
@@ -63,6 +79,7 @@
                     <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                     <input type="hidden" name="lat" id="lat"/>
                     <input type="hidden" name="lng" id="lng"/>
+                    <input type="hidden" name="signature" id="signatureData"/>
 
                     <t t-if="not points">
                         <p class="empty">Todavía no tienes paradas asignadas — habla con tu manager.</p>
@@ -79,10 +96,14 @@
                         <label>Photo (optional)</label>
                         <input type="file" name="photo" accept="image/*" capture="environment"/>
 
+                        <label>Firma del cliente (opcional)</label>
+                        <canvas id="sigPad"></canvas>
+                        <button type="button" id="sigClear" class="secondary" style="margin-top:6px">Borrar firma</button>
+
                         <label>Note (optional)</label>
                         <textarea name="note" rows="2" maxlength="250"></textarea>
 
-                        <p id="geoStatus" style="font-size:12px;color:#6b665b">Getting your location…</p>
+                        <p id="geoStatus" style="font-size:12px;color:#6c757d">Getting your location…</p>
                         <button type="submit" id="submitBtn" disabled="disabled">Submit check-in</button>
                     </t>
                 </form>
@@ -98,6 +119,7 @@
                         <t t-esc="r.point_id.name"/> — <t t-esc="r.checkin_at"/>
                     </div>
                 </t>
+            </div>
             </div>
 
             <script>
@@ -122,6 +144,56 @@
                         status.textContent = 'Location permission denied — allow it and reload.';
                         status.className = 'bad';
                     }, { enableHighAccuracy: true, timeout: 10000 });
+                })();
+
+                // Signature pad: a bare canvas + pointer events, no library. Draws in
+                // device pixels (scaled by devicePixelRatio) so it doesn't look blurry
+                // on phone screens; on submit, the drawing becomes a data-URI that the
+                // controller strips down to raw base64 for the Binary field.
+                (function () {
+                    var canvas = document.getElementById('sigPad');
+                    if (!canvas) return;
+                    var ctx = canvas.getContext('2d');
+                    var drawing = false, hasInk = false;
+                    var ratio = window.devicePixelRatio || 1;
+
+                    function resize() {
+                        var rect = canvas.getBoundingClientRect();
+                        canvas.width = rect.width * ratio;
+                        canvas.height = rect.height * ratio;
+                        ctx.scale(ratio, ratio);
+                        ctx.lineWidth = 2;
+                        ctx.lineCap = 'round';
+                        ctx.strokeStyle = '#212529';
+                    }
+                    resize();
+
+                    function pos(e) {
+                        var rect = canvas.getBoundingClientRect();
+                        var t = e.touches ? e.touches[0] : e;
+                        return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+                    }
+                    function start(e) { drawing = true; hasInk = true; var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+                    function move(e) { if (!drawing) return; var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+                    function end() { drawing = false; }
+
+                    canvas.addEventListener('mousedown', start);
+                    canvas.addEventListener('mousemove', move);
+                    window.addEventListener('mouseup', end);
+                    canvas.addEventListener('touchstart', start, { passive: false });
+                    canvas.addEventListener('touchmove', move, { passive: false });
+                    canvas.addEventListener('touchend', end);
+
+                    document.getElementById('sigClear').addEventListener('click', function () {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        hasInk = false;
+                    });
+
+                    document.getElementById('checkinForm').addEventListener('submit', function () {
+                        if (hasInk) {
+                            document.getElementById('signatureData').value = canvas.toDataURL('image/png');
+                        }
+                    });
                 })();
             </script>
         </body>

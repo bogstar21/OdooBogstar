@@ -106,9 +106,33 @@
         </field>
     </record>
 
+    <record id="view_gps_route_plan_pivot" model="ir.ui.view">
+        <field name="name">gps.route.plan.pivot</field>
+        <field name="model">gps.route.plan</field>
+        <field name="arch" type="xml">
+            <pivot string="Dispatched routes">
+                <field name="worker_id" type="row"/>
+                <field name="date" interval="week" type="col"/>
+                <field name="total_km" type="measure"/>
+                <field name="total_min" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_gps_route_plan_graph" model="ir.ui.view">
+        <field name="name">gps.route.plan.graph</field>
+        <field name="model">gps.route.plan</field>
+        <field name="arch" type="xml">
+            <graph string="Dispatched routes" type="line">
+                <field name="date" interval="day"/>
+                <field name="total_km" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="action_gps_route_plan" model="ir.actions.act_window">
         <field name="name">Dispatched routes</field>
         <field name="res_model">gps.route.plan</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,pivot,graph,form</field>
     </record>
 </odoo>
