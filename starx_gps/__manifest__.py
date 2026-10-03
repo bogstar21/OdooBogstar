@@ -19,7 +19,7 @@ Ported from a standalone Node.js SaaS (StarX) built by the same author — the r
 math (haversine distance, 2-opt local search, anomaly tagging) is a direct
 translation, not a redesign.
 """,
-    "version": "17.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Operations/Field Service",
     "author": "Bogdan Starchenko",
     "license": "LGPL-3",

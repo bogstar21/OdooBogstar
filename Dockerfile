@@ -2,7 +2,7 @@
 # Railway builds this Dockerfile directly — same pattern as any other Railway deploy,
 # just containerized because Odoo needs Python + the Odoo runtime + (via a separate
 # Railway Postgres plugin) a database, not just a Node process.
-FROM odoo:17.0
+FROM odoo:19.0
 
 USER root
 COPY ./starx_gps /mnt/extra-addons/starx_gps
