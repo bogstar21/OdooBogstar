@@ -163,7 +163,6 @@ class DemoManufacturingSeeder(models.TransientModel):
                 "is_storable": True,
                 "categ_id": categ.id,
                 "uom_id": uom_unit.id,
-                "uom_po_id": uom_unit.id,
                 "standard_price": round(random.uniform(2.0, 40.0), 2),
                 "list_price": round(random.uniform(5.0, 60.0), 2),
                 "purchase_ok": True,
@@ -186,7 +185,6 @@ class DemoManufacturingSeeder(models.TransientModel):
                 "is_storable": True,
                 "categ_id": categ.id,
                 "uom_id": uom_unit.id,
-                "uom_po_id": uom_unit.id,
                 "list_price": price,
                 "standard_price": round(price * 0.45, 2),
                 "purchase_ok": False,
@@ -244,7 +242,7 @@ class DemoManufacturingSeeder(models.TransientModel):
                             (0, 0, {
                                 "product_id": p.id,
                                 "product_qty": random.randint(10, 100),
-                                "product_uom": p.uom_po_id.id,
+                                "product_uom": p.uom_id.id,
                                 "price_unit": p.standard_price,
                                 "date_planned": fields.Datetime.now() + timedelta(days=random.randint(1, 14)),
                             })
