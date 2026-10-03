@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_demo_manufacturing_seeder_form" model="ir.ui.view">
+        <field name="name">demo.manufacturing.seeder.form</field>
+        <field name="model">demo.manufacturing.seeder</field>
+        <field name="arch" type="xml">
+            <form string="Generate Manufacturing Company">
+                <p>
+                    Creates a small furniture manufacturer ("Nordica Hogar") with
+                    vendors, customers, raw-material and finished-good products with
+                    Bills of Materials, and a batch of purchase/manufacturing/sales
+                    orders in a realistic mix of states.
+                </p>
+                <p>
+                    <b>Running this again adds another batch</b> on top of the previous
+                    one — it does not replace or reset existing data.
+                </p>
+                <footer>
+                    <button name="action_generate" type="object" string="Generate"
+                            class="btn-primary" invisible="result_log"/>
+                    <button string="Close" special="cancel" invisible="not result_log"/>
+                </footer>
+                <field name="result_log" readonly="1" invisible="not result_log" nolabel="1"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_demo_manufacturing_seeder" model="ir.actions.act_window">
+        <field name="name">Generate Manufacturing Company</field>
+        <field name="res_model">demo.manufacturing.seeder</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_demo_data_root" name="Demo Data" sequence="90"/>
+    <menuitem id="menu_demo_manufacturing_seeder" name="Generate Manufacturing Company"
+              parent="menu_demo_data_root" action="action_demo_manufacturing_seeder" sequence="10"/>
+</odoo>

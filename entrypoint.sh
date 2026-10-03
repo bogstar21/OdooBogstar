@@ -34,16 +34,19 @@ CONFEOF
 DEMO_FLAG=""
 [ "${LOAD_DEMO:-true}" = "false" ] && DEMO_FLAG="--without-demo=all"
 
-# Always (re)install starx_gps before starting the web server, instead of trying to
-# detect "is the DB fresh" first. Odoo's `-i` on an already-installed module is a
+# Always (re)install our addons before starting the web server, instead of trying
+# to detect "is the DB fresh" first. Odoo's `-i` on an already-installed module is a
 # safe, idempotent no-extra-op (it behaves like `-u`) — so this correctly covers
 # EVERY case with one code path: a totally empty database (bootstraps base +
-# dependencies + starx_gps), and the partial-failure case where base/contacts/hr
-# already installed successfully on a previous boot but starx_gps itself didn't
+# dependencies + both addons), and the partial-failure case where base/contacts/hr
+# already installed successfully on a previous boot but one of ours didn't
 # (a schema-existence check alone would silently skip it forever in that case,
 # which is exactly what happened once already — see git history).
-echo ">>> Ensuring starx_gps is installed..."
-odoo --config="$CONF" --stop-after-init -i starx_gps $DEMO_FLAG
+# demo_manufacturing_data only installs the seeder tool itself (Settings ▸
+# Technical ▸ Demo Data) — it does NOT run the data generation automatically,
+# since that's additive each time and would otherwise pile up on every redeploy.
+echo ">>> Ensuring starx_gps and demo_manufacturing_data are installed..."
+odoo --config="$CONF" --stop-after-init -i starx_gps,demo_manufacturing_data $DEMO_FLAG
 echo ">>> Install/update step complete."
 
 # Two settings the database was never given a chance to get right, since it was
