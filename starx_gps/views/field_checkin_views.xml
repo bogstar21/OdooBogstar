@@ -4,12 +4,12 @@
         <field name="name">field.checkin.list</field>
         <field name="model">field.checkin</field>
         <field name="arch" type="xml">
-            <tree string="Check-ins">
+            <list string="Check-ins">
                 <field name="checkin_at"/>
                 <field name="worker_id"/>
                 <field name="point_id"/>
                 <field name="note"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -59,7 +59,7 @@
     <record id="action_field_checkin" model="ir.actions.act_window">
         <field name="name">Check-ins</field>
         <field name="res_model">field.checkin</field>
-        <field name="view_mode">tree,pivot,graph,form</field>
+        <field name="view_mode">list,pivot,graph,form</field>
     </record>
 
     <!-- Employees: link to their no-login check-in page + the regenerate-token action -->

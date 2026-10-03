@@ -76,12 +76,12 @@
         <field name="name">gps.route.plan.list</field>
         <field name="model">gps.route.plan</field>
         <field name="arch" type="xml">
-            <tree string="Dispatched routes">
+            <list string="Dispatched routes">
                 <field name="date"/>
                 <field name="worker_id"/>
                 <field name="total_km"/>
                 <field name="total_min"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -99,11 +99,11 @@
                     </group>
                     <field name="maps_url" widget="url" string="Google Maps link"/>
                     <field name="line_ids">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="sequence"/>
                             <field name="point_id"/>
                             <field name="eta"/>
-                        </tree>
+                        </list>
                     </field>
                 </sheet>
             </form>
@@ -137,6 +137,6 @@
     <record id="action_gps_route_plan" model="ir.actions.act_window">
         <field name="name">Dispatched routes</field>
         <field name="res_model">gps.route.plan</field>
-        <field name="view_mode">tree,pivot,graph,form</field>
+        <field name="view_mode">list,pivot,graph,form</field>
     </record>
 </odoo>
