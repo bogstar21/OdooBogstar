@@ -46,7 +46,7 @@ DEMO_FLAG=""
 # Technical ▸ Demo Data) — it does NOT run the data generation automatically,
 # since that's additive each time and would otherwise pile up on every redeploy.
 echo ">>> Ensuring starx_gps and demo_manufacturing_data are installed..."
-odoo --config="$CONF" --stop-after-init -i starx_gps,demo_manufacturing_data $DEMO_FLAG
+odoo --config="$CONF" --stop-after-init -i starx_gps,demo_manufacturing_data,sale_order_review_ext $DEMO_FLAG
 echo ">>> Install/update step complete."
 
 # Two settings the database was never given a chance to get right, since it was
